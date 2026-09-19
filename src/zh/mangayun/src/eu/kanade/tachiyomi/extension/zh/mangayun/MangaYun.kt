@@ -79,7 +79,10 @@ abstract class MangaYun : KeiSource() {
 
     private fun MangaYunSearch.toSManga() = SManga.create().apply {
         url = mangaUrl(siteId, detailUrl)
-        title = this@toSManga.title
+        val sourceLabel = this@toSManga.siteName
+            ?.takeIf { it.isNotBlank() }
+            ?: this@toSManga.siteId.takeIf { it.isNotBlank() }
+        title = sourceLabel?.let { "${this@toSManga.title} [$it]" } ?: this@toSManga.title
         description = this@toSManga.description
         thumbnail_url = coverUrl
     }

@@ -1,4 +1,5 @@
 <p align="center">
+  <img src="./src/zh/mangayun/res/mipmap-xxxhdpi/ic_launcher.png" alt="云漫官方图标" width="96">
   <h1 align="center">MangaYun Mihon / Komikku 扩展</h1>
 </p>
 
@@ -10,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/napstablook666/mangayun-mihon-extension/releases"><img src="https://img.shields.io/github/v/release/napstablook666/mangayun-mihon-extension?label=release" alt="GitHub release"></a>
-  <a href="https://github.com/napstablook666/mangayun-mihon-extension/actions/workflows/release.yml"><img src="https://img.shields.io/badge/JDK-21-blue" alt="JDK 21"></a>
+  <a href="https://github.com/napstablook666/mangayun-mihon-extension/actions/workflows/release-mangayun.yml"><img src="https://img.shields.io/badge/JDK-21-blue" alt="JDK 21"></a>
   <a href="https://img.shields.io/badge/arch-arm64--v8a-green"><img src="https://img.shields.io/badge/arch-arm64--v8a-green" alt="arm64-v8a"></a>
 </p>
 
@@ -89,7 +90,7 @@ APK 输出路径：
 src/zh/mangayun/build/outputs/apk/release/
 ```
 
-扩展版本由 `src/zh/mangayun/build.gradle.kts` 中的 `libVersion` 和 `versionCode` 控制。当前版本：`1.6.3`。
+扩展版本由 `src/zh/mangayun/build.gradle.kts` 中的 `libVersion` 和 `versionCode` 控制。当前版本：`1.6.4`。
 
 ## 快速上手
 
