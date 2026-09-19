@@ -25,6 +25,11 @@ jobs:
       - name: Build arm64 release APK
         run: ./gradlew :src:zh:mangayun:lintRelease :src:zh:mangayun:assembleRelease --no-daemon
 
+      - name: Package source archive
+        shell: bash
+          git archive --format=zip --output=source.zip HEAD
+          test -s source.zip
+
       - name: Publish release and retain latest three
         env:
           GH_TOKEN: ${{ github.token }}
@@ -34,7 +39,7 @@ jobs:
           apk="$(find src/zh/mangayun/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
           test -n "$apk"
           tag="${GITHUB_REF_NAME}"
-          gh release create "$tag" "$apk" --title "$tag" --generate-notes
+          gh release create "$tag" "$apk" source.zip --title "$tag" --generate-notes
           mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
           for old_tag in "${old_releases[@]}"; do
             gh release delete "$old_tag" --yes --cleanup-tag
