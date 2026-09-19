@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -27,6 +26,7 @@ jobs:
 
       - name: Package source archive
         shell: bash
+        run: |
           git archive --format=zip --output=source.zip HEAD
           test -s source.zip
 
