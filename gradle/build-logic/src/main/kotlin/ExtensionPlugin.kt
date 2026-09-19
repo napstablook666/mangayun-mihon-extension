@@ -54,12 +54,6 @@ class ExtensionPlugin : Plugin<Project> {
 
         android {
             namespace = "eu.kanade.tachiyomi.extension"
-
-            defaultConfig {
-                ndk {
-                    abiFilters += "arm64-v8a"
-                }
-            }
             sourceSets {
                 named("main") {
                     manifest.srcFile(rootProject.file("common/AndroidManifest.xml"))

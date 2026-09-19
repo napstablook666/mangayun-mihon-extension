@@ -4,6 +4,14 @@ plugins {
     alias(kei.plugins.extension)
 }
 
+android {
+    defaultConfig {
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+    }
+}
+
 keiyoushi {
     name = "MangaYun"
     versionCode = 3
