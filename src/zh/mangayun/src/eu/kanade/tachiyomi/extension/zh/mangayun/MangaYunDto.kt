@@ -6,13 +6,40 @@ import kotlinx.serialization.Serializable
 data class SearchRequest(val keyword: String)
 
 @Serializable
-data class DetailsRequest(val siteId: String, val detailUrl: String)
-
-@Serializable
-data class ChapterImagesRequest(val siteId: String, val chapterUrl: String)
-
-@Serializable
 data class MangaYunSearchResponse(val data: List<MangaYunSearchGroup> = emptyList())
+
+@Serializable
+data class MangaYunSitesResponse(val data: List<MangaYunSite> = emptyList())
+
+@Serializable
+data class MangaYunSite(val siteId: String, val siteName: String? = null)
+
+@Serializable
+data class MangaYunProfileResponse(val user: MangaYunUser? = null)
+
+@Serializable
+data class MangaYunUser(
+    val id: String? = null,
+    val username: String? = null,
+    val name: String? = null,
+    val avatarUrl: String? = null,
+    val trustLevel: Int? = null,
+)
+
+@Serializable
+data class MangaYunShelfResponse(val data: List<MangaYunShelfItem> = emptyList())
+
+@Serializable
+data class MangaYunShelfItem(
+    val siteId: String,
+    val siteName: String? = null,
+    val title: String,
+    val detailUrl: String,
+    val coverUrl: String? = null,
+    val chapterName: String? = null,
+    val chapterUrl: String? = null,
+    val openedAt: Long = 0,
+)
 
 @Serializable
 data class MangaYunSearchGroup(
@@ -28,7 +55,23 @@ data class MangaYunSearch(
     val coverUrl: String? = null,
     val description: String? = null,
     val siteId: String = "",
+    val siteName: String? = null,
 )
+
+@Serializable
+data class DetailsRequest(val siteId: String, val detailUrl: String)
+
+@Serializable
+data class ChapterImagesRequest(val siteId: String, val chapterUrl: String)
+
+@Serializable
+data class ShelfRequest(val item: MangaYunShelfItem)
+
+@Serializable
+data class ShelfItemsRequest(val items: List<MangaYunShelfItem>)
+
+@Serializable
+data class ShelfDeleteRequest(val siteId: String, val detailUrl: String)
 
 @Serializable
 data class MangaYunDetailsResponse(val data: MangaYunDetails)

@@ -1,0 +1,41 @@
+name: Release MangaYun
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build arm64 release APK
+        run: ./gradlew :src:zh:mangayun:lintRelease :src:zh:mangayun:assembleRelease --no-daemon
+
+      - name: Publish release and retain latest three
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$(find src/zh/mangayun/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$apk"
+          tag="${GITHUB_REF_NAME}"
+          gh release create "$tag" "$apk" --title "$tag" --generate-notes
+          mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
+          for old_tag in "${old_releases[@]}"; do
+            gh release delete "$old_tag" --yes --cleanup-tag
+          done
