@@ -28,7 +28,7 @@ src/zh/mangayun/build/outputs/apk/release/
 
 ## 自动发布
 
-推送 `v*` 标签会触发 GitHub Actions，使用 JDK 21 构建并发布 arm64 APK，同时上传当前源码 `source.zip`。发布流程会删除较旧的 Release，仅保留最新 3 个 Release。阅读进度由 Komikku 本地记录，不依赖云漫或 LinuxDo 登录。
+推送 `v*` 标签会触发 GitHub Actions，使用 JDK 21 构建并发布 arm64 APK，同时上传当前源码 `source.zip`。发布流程会删除较旧的 Release，仅保留最新 3 个 Release。阅读进度由 Komikku 本地记录。
 
 ## 源码
 
