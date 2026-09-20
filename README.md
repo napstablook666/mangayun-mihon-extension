@@ -89,7 +89,7 @@ The APK is output to:
 src/zh/mangayun/build/outputs/apk/release/
 ```
 
-Extension version is derived from `libVersion` and `versionCode` in `src/zh/mangayun/build.gradle.kts`. Current version: `1.6.4`.
+Extension version is derived from `libVersion` and `versionCode` in `src/zh/mangayun/build.gradle.kts`. Current version: `1.6.7`.
 
 ## Quick Start
 

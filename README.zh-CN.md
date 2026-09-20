@@ -90,7 +90,7 @@ APK 输出路径：
 src/zh/mangayun/build/outputs/apk/release/
 ```
 
-扩展版本由 `src/zh/mangayun/build.gradle.kts` 中的 `libVersion` 和 `versionCode` 控制。当前版本：`1.6.4`。
+扩展版本由 `src/zh/mangayun/build.gradle.kts` 中的 `libVersion` 和 `versionCode` 控制。当前版本：`1.6.7`。
 
 ## 快速上手
 

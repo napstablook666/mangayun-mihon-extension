@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
 import keiyoushi.source.KeiSource
+import eu.kanade.tachiyomi.source.model.Filter
+import kotlinx.serialization.json.*
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -19,7 +21,45 @@ abstract class MangaYun : KeiSource() {
     private val api = MangaYunApi(this)
 
     override val supportsLatest = false
+    override val supportsFilterFetching: Boolean get() = true
 
+    private val siteNameToId = mutableMapOf<String, String>()
+
+
+    override suspend fun fetchFilterData(): JsonElement {
+        val sites = api.sites()
+        return buildJsonArray {
+            sites.forEach { site ->
+                addJsonObject {
+                    put("siteId", site.siteId)
+                    site.siteName?.let { put("siteName", it) }
+                }
+            }
+        }
+    }
+
+    override fun getFilterList(data: JsonElement?): FilterList {
+        siteNameToId.clear()
+        if (data == null || data is JsonNull) {
+            return FilterList(listOf(Filter.Header("Tap Search to load sources")))
+        }
+
+        val arr = data.jsonArray
+        if (arr.isEmpty()) return FilterList(listOf(Filter.Header("No sources available")))
+
+        return FilterList(
+            buildList {
+                add(Filter.Header("Sources — uncheck to exclude"))
+                arr.forEach { element ->
+                    val obj = element.jsonObject
+                    val siteId = obj["siteId"]!!.jsonPrimitive.content
+                    val siteName = obj["siteName"]?.jsonPrimitive?.content ?: siteId
+                    add(Filter.CheckBox(siteName, true))
+                    siteNameToId[siteName] = siteId
+                }
+            },
+        )
+    }
     override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
 
     override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
@@ -27,7 +67,24 @@ abstract class MangaYun : KeiSource() {
     override suspend fun getSearchMangaList(page: Int, query: String, filters: FilterList): MangasPage {
         if (page > 1 || query.isBlank()) return MangasPage(emptyList(), false)
 
-        return MangasPage(api.search(query).map { it.toSManga() }, false)
+        val results = api.search(query)
+
+        val siteFilters = filters.filterIsInstance<Filter.CheckBox>()
+        val filteredResults = if (siteFilters.isNotEmpty() && siteNameToId.isNotEmpty()) {
+            val checkedSiteIds = siteFilters
+                .filter { it.state }
+                .mapNotNull { siteNameToId[it.name] }
+                .toSet()
+            if (checkedSiteIds.size < siteNameToId.size) {
+                results.filter { it.siteId in checkedSiteIds }
+            } else {
+                results
+            }
+        } else {
+            results
+        }
+
+        return MangasPage(filteredResults.map { it.toSManga() }, false)
     }
 
     override suspend fun fetchMangaUpdate(

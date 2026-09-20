@@ -12,9 +12,24 @@ import java.util.UUID
 
 internal class MangaYunApi(private val source: MangaYun) {
 
-    suspend fun search(keyword: String): List<MangaYunSearch> = post<SearchRequest, MangaYunSearchResponse>("/api/search", SearchRequest(keyword))
-        .data
-        .flatMap { group -> group.results.map { it.copy(siteId = group.siteId, siteName = group.siteName) } }
+    suspend fun search(keyword: String): List<MangaYunSearch> {
+        val normalizedKeyword = keyword.normalizeSearchText()
+        return post<SearchRequest, MangaYunSearchResponse>("/api/search", SearchRequest(keyword))
+            .data
+            .flatMap { group -> group.results.map { it.copy(siteId = group.siteId, siteName = group.siteName) } }
+            .sortedWith(
+                compareBy<MangaYunSearch> { result ->
+                    val title = result.title.normalizeSearchText()
+                    when {
+                        normalizedKeyword.isNotEmpty() && title == normalizedKeyword -> 0
+                        normalizedKeyword.isNotEmpty() && title.contains(normalizedKeyword) -> 1
+                        else -> 2
+                    }
+                }.thenBy { it.title.length },
+            )
+    }
+
+    private fun String.normalizeSearchText(): String = lowercase().filterNot { it.isWhitespace() }
 
     suspend fun sites(): List<MangaYunSite> = get<MangaYunSitesResponse>("/api/sites").data
 
