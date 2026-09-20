@@ -21,11 +21,12 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
+import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.ConnectionPool
-import okhttp3.Dispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,7 +41,7 @@ abstract class MangaYun : KeiSource() {
         connectTimeout(30, TimeUnit.SECONDS)
         readTimeout(30, TimeUnit.SECONDS)
         connectionPool(ConnectionPool(8, 60, TimeUnit.SECONDS))
-        dispatcher.maxRequestsPerHost = 8
+        dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })
         addInterceptor(ImageRetryInterceptor())
         rateLimit(permits = 30, period = 60.seconds, interval = 1.seconds) { it.host == "mangayun.com" }
     }
