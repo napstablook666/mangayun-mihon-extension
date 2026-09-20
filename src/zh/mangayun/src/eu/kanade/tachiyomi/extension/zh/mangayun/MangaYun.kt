@@ -30,8 +30,7 @@ abstract class MangaYun : KeiSource() {
     override val supportsLatest = false
     override val supportsFilterFetching: Boolean get() = true
 
-    private val siteNameToId = mutableMapOf<String, String>()
-
+    private class SiteCheckBox(name: String, val siteId: String) : Filter.CheckBox(name)
     override suspend fun fetchFilterData(): JsonElement {
         val sites = api.sites()
         return buildJsonArray {
@@ -45,7 +44,6 @@ abstract class MangaYun : KeiSource() {
     }
 
     override fun getFilterList(data: JsonElement?): FilterList {
-        siteNameToId.clear()
         if (data == null || data is JsonNull) {
             return FilterList(listOf(Filter.Header("Tap Search to load sources")))
         }
@@ -60,8 +58,7 @@ abstract class MangaYun : KeiSource() {
                     val obj = element.jsonObject
                     val siteId = obj["siteId"]!!.jsonPrimitive.content
                     val siteName = obj["siteName"]?.jsonPrimitive?.content ?: siteId
-                    add(Filter.CheckBox(siteName, true))
-                    siteNameToId[siteName] = siteId
+                    add(SiteCheckBox(siteName, siteId))
                 }
             },
         )
@@ -75,13 +72,13 @@ abstract class MangaYun : KeiSource() {
 
         val results = api.search(query)
 
-        val siteFilters = filters.filterIsInstance<Filter.CheckBox>()
-        val filteredResults = if (siteFilters.isNotEmpty() && siteNameToId.isNotEmpty()) {
+        val siteFilters = filters.filterIsInstance<SiteCheckBox>()
+        val filteredResults = if (siteFilters.isNotEmpty()) {
             val checkedSiteIds = siteFilters
                 .filter { it.state }
-                .mapNotNull { siteNameToId[it.name] }
+                .map { it.siteId }
                 .toSet()
-            if (checkedSiteIds.size < siteNameToId.size) {
+            if (checkedSiteIds.size < siteFilters.size) {
                 results.filter { it.siteId in checkedSiteIds }
             } else {
                 results
