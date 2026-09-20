@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension.zh.mangayun
 
 import android.util.Base64
+import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -9,15 +10,14 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
 import keiyoushi.source.KeiSource
-import eu.kanade.tachiyomi.source.model.Filter
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.addJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -31,7 +31,6 @@ abstract class MangaYun : KeiSource() {
     override val supportsFilterFetching: Boolean get() = true
 
     private val siteNameToId = mutableMapOf<String, String>()
-
 
     override suspend fun fetchFilterData(): JsonElement {
         val sites = api.sites()
