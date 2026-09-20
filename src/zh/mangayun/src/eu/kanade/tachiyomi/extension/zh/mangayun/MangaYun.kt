@@ -9,9 +9,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
-import keiyoushi.source.KeiSource
 import keiyoushi.network.rateLimit
-import kotlin.time.Duration.Companion.seconds
+import keiyoushi.source.KeiSource
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.addJsonObject
@@ -21,9 +20,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import kotlin.time.Duration.Companion.seconds
 
 @Source
 abstract class MangaYun : KeiSource() {
