@@ -12,6 +12,10 @@ android {
     }
 }
 
+dependencies {
+    implementation(project(":lib:randomua"))
+}
+
 keiyoushi {
     name = "MangaYun"
     versionCode = 8
@@ -21,6 +25,6 @@ keiyoushi {
     source {
         name = "MangaYun"
         lang = "zh"
-        baseUrl = "https://mangayun.com"
+        baseUrl { custom("https://mangayun.com") }
     }
 }
