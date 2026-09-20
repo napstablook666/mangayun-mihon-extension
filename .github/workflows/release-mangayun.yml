@@ -21,7 +21,20 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+
+      - name: Restore release signing key
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "$SIGNING_KEYSTORE_BASE64"
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > signingkey.jks
+          chmod 600 signingkey.jks
       - name: Build arm64 release APK
+        env:
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew :src:zh:mangayun:lintRelease :src:zh:mangayun:assembleRelease --no-daemon
 
       - name: Package source archive
@@ -52,7 +65,14 @@ jobs:
             [ -n "$fixes" ] && notes+="🐛 修复\n$fixes\n\n"
             [ -n "$chore" ] && notes+="🔧 杂项\n$chore\n\n"
           fi
-          gh release create "$tag" "$apk" source.zip --title "$tag" --notes "$(echo -e "$notes")"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            old_apk="$(gh release view "$tag" --json assets --jq '.assets[].name | select(endswith(".apk"))' | head -n1 || true)"
+            [ -z "$old_apk" ] || gh release delete-asset "$tag" "$old_apk" --yes
+            gh release upload "$tag" "$apk" source.zip --clobber
+            gh release edit "$tag" --title "$tag" --notes "$(echo -e "$notes")"
+          else
+            gh release create "$tag" "$apk" source.zip --title "$tag" --notes "$(echo -e "$notes")"
+          fi
           mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
           for old_tag in "${old_releases[@]}"; do
             gh release delete "$old_tag" --yes --cleanup-tag

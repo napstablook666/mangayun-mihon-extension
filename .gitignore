@@ -2,4 +2,5 @@
 build/
 **/build/
 local.properties
+signingkey.jks
 .kotlin/
