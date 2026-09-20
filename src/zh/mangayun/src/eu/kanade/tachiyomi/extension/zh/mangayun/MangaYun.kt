@@ -30,7 +30,7 @@ abstract class MangaYun : KeiSource() {
     override val supportsLatest = false
     override val supportsFilterFetching: Boolean get() = true
 
-    private class SiteCheckBox(name: String, val siteId: String) : Filter.CheckBox(name)
+    private class SiteCheckBox(name: String, val siteId: String, state: Boolean = true) : Filter.CheckBox(name, state)
     override suspend fun fetchFilterData(): JsonElement {
         val sites = api.sites()
         return buildJsonArray {
