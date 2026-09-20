@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
+import keiyoushi.lib.randomua.UserAgentType
+import keiyoushi.lib.randomua.setRandomUserAgent
 import keiyoushi.network.rateLimit
 import keiyoushi.source.KeiSource
 import kotlinx.serialization.json.JsonElement
@@ -21,15 +23,68 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
-
 @Source
 abstract class MangaYun : KeiSource() {
 
     override fun OkHttpClient.Builder.configureClient(): OkHttpClient.Builder = apply {
+        connectTimeout(30, TimeUnit.SECONDS)
+        readTimeout(30, TimeUnit.SECONDS)
+        connectionPool(ConnectionPool(8, 60, TimeUnit.SECONDS))
+        dispatcher.maxRequestsPerHost = 8
+        addInterceptor(ImageRetryInterceptor())
         rateLimit(permits = 30, period = 60.seconds, interval = 1.seconds) { it.host == "mangayun.com" }
+    }
+
+    override fun Headers.Builder.configureHeaders(): Headers.Builder = apply {
+        setRandomUserAgent(userAgentType = UserAgentType.MOBILE)
+    }
+
+    override fun getMangaUrl(manga: SManga): String = baseUrl + manga.url
+
+    private class ImageRetryInterceptor : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request()
+            var attempt = 0
+            val maxAttempts = 3
+            var lastException: IOException? = null
+
+            while (attempt < maxAttempts) {
+                if (attempt > 0) {
+                    Thread.sleep(1000)
+                }
+                try {
+                    val response = chain.proceed(request)
+                    if (response.isSuccessful || attempt == maxAttempts - 1 || !isImageRequest(request)) {
+                        return response
+                    }
+                    if (response.code in 500..599) {
+                        response.close()
+                        attempt++
+                        continue
+                    }
+                    return response
+                } catch (e: IOException) {
+                    lastException = e
+                    attempt++
+                }
+            }
+            throw lastException ?: IOException("Request failed after $maxAttempts attempts")
+        }
+
+        private fun isImageRequest(request: Request): Boolean {
+            val accept = request.header("Accept") ?: return false
+            return accept.contains("image/")
+        }
     }
 
     private val api = MangaYunApi(this)
@@ -127,10 +182,18 @@ abstract class MangaYun : KeiSource() {
         }
     }
 
-    override fun imageRequest(page: Page): Request = super.imageRequest(page).newBuilder()
-        .header("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
-        .header("Referer", baseUrl + "/")
-        .build()
+    override fun imageRequest(page: Page): Request {
+        val referer = runCatching {
+            val host = page.imageUrl?.let { it.toHttpUrlOrNull()?.host }
+            if (host != null) "https://$host/" else baseUrl + "/"
+        }.getOrDefault(baseUrl + "/")
+
+        return super.imageRequest(page).newBuilder()
+            .header("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+            .header("Referer", referer)
+            .cacheControl(okhttp3.CacheControl.Builder().maxAge(7, TimeUnit.DAYS).build())
+            .build()
+    }
 
     override suspend fun getMangaByUrl(url: HttpUrl): SManga? {
         if (url.host != baseUrl.toHttpUrl().host || url.pathSegments.firstOrNull() != "manga") return null
