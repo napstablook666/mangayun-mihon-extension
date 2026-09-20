@@ -14,7 +14,6 @@
   <a href="https://github.com/napstablook666/mangayun-mihon-extension/actions/workflows/release-mangayun.yml"><img src="https://img.shields.io/badge/JDK-21-blue" alt="JDK 21"></a>
   <a href="https://img.shields.io/badge/arch-arm64--v8a-green"><img src="https://img.shields.io/badge/arch-arm64--v8a-green" alt="arm64-v8a"></a>
   <a href="https://linux.do/"><img src="https://img.shields.io/badge/LINUX.DO-社区-2EA44F" alt="LINUX DO"></a>
-  <a href="https://linux.do/"><img src="https://ld.xh.do/ld-badge.svg" width="120" height="28" alt="认可 LINUX DO"></a>
 </p>
 
 MangaYun 是基于[云漫](https://mangayun.com)聚合接口的漫画源扩展，适用于 [Mihon](https://github.com/mihonapp/mihon)。一次搜索即可浏览多个中文漫画站点的结果。
@@ -113,3 +112,12 @@ APK 输出路径：`src/zh/mangayun/build/outputs/apk/release/`
 ## 许可
 
 [MIT](LICENSE) © 2026 napstablook666
+
+---
+
+<p align="center">
+  <a href="https://linux.do/"><img src="https://ld.xh.do/ld-badge.svg" width="200" alt="认可 LINUX DO"></a>
+</p>
+<p align="center">
+  <a href="https://linux.do/">LINUX DO</a> — 新的理想型社区 · Where possible begins.
+</p>

@@ -14,7 +14,6 @@
   <a href="https://github.com/napstablook666/mangayun-mihon-extension/actions/workflows/release-mangayun.yml"><img src="https://img.shields.io/badge/JDK-21-blue" alt="JDK 21"></a>
   <a href="https://img.shields.io/badge/arch-arm64--v8a-green"><img src="https://img.shields.io/badge/arch-arm64--v8a-green" alt="arm64-v8a"></a>
   <a href="https://linux.do/"><img src="https://img.shields.io/badge/LINUX.DO-社区-2EA44F" alt="LINUX DO"></a>
-  <a href="https://linux.do/"><img src="https://ld.xh.do/ld-badge.svg" width="120" height="28" alt="认可 LINUX DO"></a>
 </p>
 
 MangaYun is a Mihon extension that aggregates manga from multiple Chinese sites through the [YunMan](https://mangayun.com) cloud API. Search once, browse results from all available sites in one place.
@@ -112,3 +111,12 @@ The extension source lives in `src/zh/mangayun/`. This project builds on the [Ke
 ## License
 
 [MIT](LICENSE) © 2026 napstablook666
+
+---
+
+<p align="center">
+  <a href="https://linux.do/"><img src="https://ld.xh.do/ld-badge.svg" width="200" alt="认可 LINUX DO"></a>
+</p>
+<p align="center">
+  <a href="https://linux.do/">LINUX DO</a> — 新的理想型社区 · Where possible begins.
+</p>
