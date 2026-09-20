@@ -10,6 +10,8 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
 import keiyoushi.source.KeiSource
+import keiyoushi.network.rateLimit
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.addJsonObject
@@ -19,11 +21,16 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 
 @Source
 abstract class MangaYun : KeiSource() {
+
+    override fun OkHttpClient.Builder.configureClient(): OkHttpClient.Builder = apply {
+        rateLimit(permits = 30, period = 60.seconds, interval = 1.seconds) { it.host == "mangayun.com" }
+    }
 
     private val api = MangaYunApi(this)
 

@@ -39,7 +39,20 @@ jobs:
           apk="$(find src/zh/mangayun/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
           test -n "$apk"
           tag="${GITHUB_REF_NAME}"
-          gh release create "$tag" "$apk" source.zip --title "$tag" --generate-notes
+          prev_tag="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)"
+          if [ -z "$prev_tag" ]; then
+            notes="## 更新内容\n\n- 初始版本"
+          else
+            log="$(git log "$prev_tag"..HEAD --oneline --format='%s')"
+            new="$(echo "$log" | grep -E '^feat' | sed 's/^feat: */  /')"
+            fixes="$(echo "$log" | grep -E '^fix' | sed 's/^fix: */  /')"
+            chore="$(echo "$log" | grep -E '^(chore|ci|docs)' | sed 's/^[a-z]*: */  /')"
+            notes=""
+            [ -n "$new" ]   && notes+="🚀 新功能\n$new\n\n"
+            [ -n "$fixes" ] && notes+="🐛 修复\n$fixes\n\n"
+            [ -n "$chore" ] && notes+="🔧 杂项\n$chore\n\n"
+          fi
+          gh release create "$tag" "$apk" source.zip --title "$tag" --notes "$(echo -e "$notes")"
           mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
           for old_tag in "${old_releases[@]}"; do
             gh release delete "$old_tag" --yes --cleanup-tag
