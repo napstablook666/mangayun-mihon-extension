@@ -59,9 +59,11 @@ jobs:
             log="$(git log "$prev_tag"..HEAD --oneline --format='%s')"
             new="$(echo "$log" | grep -E '^feat' | sed 's/^feat: */  /')"
             fixes="$(echo "$log" | grep -E '^fix' | sed 's/^fix: */  /')"
+            perf="$(echo "$log" | grep -E '^perf' | sed 's/^perf[^:]*: */  /')"
             chore="$(echo "$log" | grep -E '^(chore|ci|docs)' | sed 's/^[a-z]*: */  /')"
             notes=""
             [ -n "$new" ]   && notes+="🚀 新功能\n$new\n\n"
+            [ -n "$perf" ]  && notes+="⚡ 性能优化\n$perf\n\n"
             [ -n "$fixes" ] && notes+="🐛 修复\n$fixes\n\n"
             [ -n "$chore" ] && notes+="🔧 杂项\n$chore\n\n"
           fi
