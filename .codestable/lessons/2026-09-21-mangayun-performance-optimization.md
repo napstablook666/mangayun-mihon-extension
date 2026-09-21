@@ -27,6 +27,21 @@ Keiyoushi 框架已内置丰富的网络优化组件，扩展无需自行实现�
 - **动态 Referer**：从图片 URL 提取 host 拼接 Referer 头（`imageUrl.host`），而非硬编码 `baseUrl`，避免图片 CDN 因 Referer 不匹配而拒绝请求
 - **随机 UA（Mobile 类型）**：降低 CDN / CloudFront 按 UA 封禁的概率
 
+
+### OkHttp 5.4.0 API 兼容
+
+- `OkHttpClient.Builder.dispatcher` 在 OkHttp 5.4.0 中变为 `internal`，不可直接赋值，须用 `dispatcher(Dispatcher().apply { maxRequestsPerHost = 8 })`
+- `configureHeaders()` 返回 `Headers.Builder`，需要 `import okhttp3.Headers`
+
+### Windows Git SSL 推送
+
+- Windows 上 `schannel` SSL 后端可能握手失败，改用 OpenSSL：`git -c http.sslBackend=openssl push`
+- 若本地有代理环境变量干扰，需清除：`env -u HTTP_PROXY -u HTTPS_PROXY git push`
+
+### Release 工作流 commit 前缀
+
+- `.github/workflows/release-mangayun.yml` 的 release notes 生成逻辑支持 `feat`（🚀）、`perf`（⚡）、`fix`（🐛）、`chore|ci|docs`（🔧）前缀
+- `perf:` 前缀的 commit 自动归入 ⚡ 性能优化 分类
 ### 用户可配置性
 
 - **baseUrl { custom("...") }**：允许用户在 Mihon 设置中填入自定义代理 / CDN 地址，零代码改动即可切换镜像或加速节点
