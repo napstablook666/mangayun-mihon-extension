@@ -20,9 +20,9 @@
 
 ## Acceptance Criteria
 
-- [ ] 扩展版本为 1.6.10。
-- [ ] `v1.6.10` 已推送。
-- [ ] GitHub Release `v1.6.10` 已创建。
-- [ ] Release 页面包含明确的中文更新内容。
-- [ ] Release 附件包含 1.6.10 APK。
-- [ ] APK workflow 成功。
+- [x] 扩展版本为 1.6.10。
+- [x] `v1.6.10` 已推送。
+- [x] GitHub Release `v1.6.10` 已创建。
+- [x] Release 页面包含明确的中文更新内容。
+- [x] Release 附件包含 1.6.10 APK。
+- [x] APK workflow 成功。
