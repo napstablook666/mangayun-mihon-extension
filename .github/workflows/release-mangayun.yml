@@ -91,5 +91,5 @@ jobs:
           fi
           mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
           for old_tag in "${old_releases[@]}"; do
-            gh release delete "$old_tag" --yes --cleanup-tag
+            gh release delete "$old_tag" --yes --cleanup-tag 2>/dev/null || true
           done
