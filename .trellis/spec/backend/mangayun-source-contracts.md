@@ -23,6 +23,7 @@ This contract applies to the `src/zh/mangayun` extension when integrating with `
 - Manga detail URLs use `/m/{base64url(JSON.stringify([siteId, detailUrl]))}`. The extension may continue decoding legacy `base64url("siteId\\nurl")` records for stored entries.
 - Covers should use `/api/image` unless the source host is `hamreus.com`, `cdndm5.com`, `ccavbox.com`, `bgm.tv`, or `tuku.cc`; existing `/api/image` URLs must not be wrapped again.
 - Image requests use `https://www.dm5.com/` as Referer for `*.cdndm5.com`; otherwise use the image host root.
+- `*.hamreus.com` chapter images require `https://www.manhuagui.com/` as Referer; other image hosts retain the host-root fallback.
 
 ## 4. Validation & Error Matrix
 
@@ -34,6 +35,7 @@ This contract applies to the `src/zh/mangayun` extension when integrating with `
 | Existing `/api/image` cover | Return it unchanged. |
 | Invalid manga key | Return `null` from `getMangaByUrl` instead of throwing. |
 | DM5 image host | Send `Referer: https://www.dm5.com/`. |
+| Hamreus image host | Send `Referer: https://www.manhuagui.com/`. |
 
 ## 5. Good / Base / Bad Cases
 
@@ -48,6 +50,7 @@ This contract applies to the `src/zh/mangayun` extension when integrating with `
 - Verify `/api/home-sections` deserializes through the `data` wrapper and maps both sections.
 - Verify a new JSON-array `/m/` key and a legacy newline key both decode to the same `siteId` and `detailUrl`.
 - Verify cover proxy normalization, existing proxy passthrough, DM5 Referer mapping, and non-DM5 host Referer mapping.
+- Verify the `*.hamreus.com` chapter image Referer mapping to `https://www.manhuagui.com/` and the old host-root request is rejected.
 
 ## 7. Wrong vs Correct
 

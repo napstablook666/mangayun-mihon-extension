@@ -198,6 +198,7 @@ abstract class MangaYun : KeiSource() {
             when {
                 host == null -> baseUrl + "/"
                 host == "cdndm5.com" || host.endsWith(".cdndm5.com") -> "https://www.dm5.com/"
+                host == "hamreus.com" || host.endsWith(".hamreus.com") -> "https://www.manhuagui.com/"
                 else -> "https://$host/"
             }
         }.getOrDefault(baseUrl + "/")
