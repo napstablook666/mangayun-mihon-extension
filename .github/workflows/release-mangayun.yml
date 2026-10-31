@@ -63,21 +63,7 @@ jobs:
           test -n "$apk"
           tag="${GITHUB_REF_NAME}"
           if [ "$tag" = "v1.6.10" ]; then
-            notes="$(cat <<'EOF'
-## MangaYun 1.6.10
-
-### 更新内容
-
-- 适配 mangayun.com 当前新版 SPA 接口。
-- 新增热门和最新漫画列表。
-- 修复封面加载，支持 MangaYun 图片代理。
-- 修复 DM5 图片 Referer，提升封面和章节图片加载成功率。
-- 适配新版 `/m/<key>` 漫画详情路由。
-- 兼容新版 JSON key，同时保留旧版 key 解析。
-- 补齐搜索站点错误、额外字段和章节更新时间字段。
-- 保持现有签名算法和章节图片接口兼容。
-EOF
-)"
+            notes="## MangaYun 1.6.10\n\n### 更新内容\n\n- 适配 mangayun.com 当前新版 SPA 接口。\n- 新增热门和最新漫画列表。\n- 修复封面加载，支持 MangaYun 图片代理。\n- 修复 DM5 图片 Referer，提升封面和章节图片加载成功率。\n- 适配新版 /m/<key> 漫画详情路由。\n- 兼容新版 JSON key，同时保留旧版 key 解析。\n- 补齐搜索站点错误、额外字段和章节更新时间字段。\n- 保持现有签名算法和章节图片接口兼容。"
           else
             prev_tag="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)"
             if [ -z "$prev_tag" ]; then
