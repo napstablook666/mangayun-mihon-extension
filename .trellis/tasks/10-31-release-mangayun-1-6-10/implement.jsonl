@@ -1,0 +1,2 @@
+{"file": ".github/workflows/release-mangayun.yml", "reason": "版本标签触发 Release 和更新说明"}
+{"file": "src/zh/mangayun/build.gradle.kts", "reason": "扩展版本号"}

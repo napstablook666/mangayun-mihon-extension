@@ -62,20 +62,38 @@ jobs:
           apk="$(find src/zh/mangayun/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
           test -n "$apk"
           tag="${GITHUB_REF_NAME}"
-          prev_tag="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)"
-          if [ -z "$prev_tag" ]; then
-            notes="## 更新内容\n\n- 初始版本"
+          if [ "$tag" = "v1.6.10" ]; then
+            notes="$(cat <<'EOF'
+## MangaYun 1.6.10
+
+### 更新内容
+
+- 适配 mangayun.com 当前新版 SPA 接口。
+- 新增热门和最新漫画列表。
+- 修复封面加载，支持 MangaYun 图片代理。
+- 修复 DM5 图片 Referer，提升封面和章节图片加载成功率。
+- 适配新版 `/m/<key>` 漫画详情路由。
+- 兼容新版 JSON key，同时保留旧版 key 解析。
+- 补齐搜索站点错误、额外字段和章节更新时间字段。
+- 保持现有签名算法和章节图片接口兼容。
+EOF
+)"
           else
-            log="$(git log "$prev_tag"..HEAD --oneline --format='%s')"
-            new="$(echo "$log" | grep -E '^feat' | sed 's/^feat: */  /')"
-            fixes="$(echo "$log" | grep -E '^fix' | sed 's/^fix: */  /')"
-            perf="$(echo "$log" | grep -E '^perf' | sed 's/^perf[^:]*: */  /')"
-            chore="$(echo "$log" | grep -E '^(chore|ci|docs)' | sed 's/^[a-z]*: */  /')"
-            notes=""
-            [ -n "$new" ]   && notes+="🚀 新功能\n$new\n\n"
-            [ -n "$perf" ]  && notes+="⚡ 性能优化\n$perf\n\n"
-            [ -n "$fixes" ] && notes+="🐛 修复\n$fixes\n\n"
-            [ -n "$chore" ] && notes+="🔧 杂项\n$chore\n\n"
+            prev_tag="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)"
+            if [ -z "$prev_tag" ]; then
+              notes="## 更新内容\n\n- 初始版本"
+            else
+              log="$(git log "$prev_tag"..HEAD --oneline --format='%s')"
+              new="$(echo "$log" | grep -E '^feat' | sed 's/^feat: */  /')"
+              fixes="$(echo "$log" | grep -E '^fix' | sed 's/^fix: */  /')"
+              perf="$(echo "$log" | grep -E '^perf' | sed 's/^perf[^:]*: */  /')"
+              chore="$(echo "$log" | grep -E '^(chore|ci|docs)' | sed 's/^[a-z]*: */  /')"
+              notes=""
+              [ -n "$new" ]   && notes+="🚀 新功能\n$new\n\n"
+              [ -n "$perf" ]  && notes+="⚡ 性能优化\n$perf\n\n"
+              [ -n "$fixes" ] && notes+="🐛 修复\n$fixes\n\n"
+              [ -n "$chore" ] && notes+="🔧 杂项\n$chore\n\n"
+            fi
           fi
           if gh release view "$tag" >/dev/null 2>&1; then
             old_apk="$(gh release view "$tag" --json assets --jq '.assets[].name | select(endswith(".apk"))' | head -n1 || true)"
