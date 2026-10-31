@@ -9,6 +9,29 @@ data class SearchRequest(val keyword: String)
 data class MangaYunSearchResponse(val data: List<MangaYunSearchGroup> = emptyList())
 
 @Serializable
+data class MangaYunHomeSectionsResponse(val data: MangaYunHomeSections = MangaYunHomeSections())
+
+@Serializable
+data class MangaYunHomeSections(
+    val popular: List<MangaYunHomeSection> = emptyList(),
+    val recent: List<MangaYunHomeSection> = emptyList(),
+)
+
+@Serializable
+data class MangaYunHomeSection(
+    val id: String? = null,
+    val title: String,
+    val coverUrl: String? = null,
+    val siteId: String,
+    val siteName: String? = null,
+    val detailUrl: String,
+    val latestChapter: String? = null,
+    val views: Long? = null,
+    val addedAt: Long? = null,
+    val updatedAt: Long? = null,
+)
+
+@Serializable
 data class MangaYunSitesResponse(val data: List<MangaYunSite> = emptyList())
 
 @Serializable
@@ -46,6 +69,7 @@ data class MangaYunSearchGroup(
     val siteId: String,
     val siteName: String? = null,
     val results: List<MangaYunSearch> = emptyList(),
+    val error: String? = null,
 )
 
 @Serializable
@@ -56,6 +80,7 @@ data class MangaYunSearch(
     val description: String? = null,
     val siteId: String = "",
     val siteName: String? = null,
+    val extra: Map<String, String>? = null,
 )
 
 @Serializable
@@ -94,6 +119,7 @@ data class MangaYunChapter(
     val name: String,
     val url: String,
     val order: Int = 0,
+    val updatedAt: String? = null,
 )
 
 @Serializable

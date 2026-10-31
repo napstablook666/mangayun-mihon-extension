@@ -33,6 +33,8 @@ internal class MangaYunApi(private val source: MangaYun) {
 
     suspend fun sites(): List<MangaYunSite> = get<MangaYunSitesResponse>("/api/sites").data
 
+    suspend fun homeSections(): MangaYunHomeSections = get<MangaYunHomeSectionsResponse>("/api/home-sections").data
+
     suspend fun profile(): MangaYunUser? = get<MangaYunProfileResponse>("/api/user/profile").user
 
     suspend fun shelf(): List<MangaYunShelfItem> = get<MangaYunShelfResponse>("/api/user/shelf").data

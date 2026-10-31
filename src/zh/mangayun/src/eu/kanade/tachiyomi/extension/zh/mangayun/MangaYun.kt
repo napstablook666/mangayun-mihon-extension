@@ -13,8 +13,11 @@ import keiyoushi.lib.randomua.UserAgentType
 import keiyoushi.lib.randomua.setRandomUserAgent
 import keiyoushi.network.rateLimit
 import keiyoushi.source.KeiSource
+import keiyoushi.utils.parseAs
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonArray
@@ -90,7 +93,7 @@ abstract class MangaYun : KeiSource() {
 
     private val api = MangaYunApi(this)
 
-    override val supportsLatest = false
+    override val supportsLatest = true
     override val supportsFilterFetching: Boolean get() = true
 
     private class SiteCheckBox(name: String, val siteId: String, state: Boolean = true) : Filter.CheckBox(name, state)
@@ -126,9 +129,15 @@ abstract class MangaYun : KeiSource() {
             },
         )
     }
-    override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
+    override suspend fun getPopularManga(page: Int): MangasPage {
+        if (page > 1) return MangasPage(emptyList(), false)
+        return MangasPage(api.homeSections().popular.map { it.toSManga() }, false)
+    }
 
-    override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
+    override suspend fun getLatestUpdates(page: Int): MangasPage {
+        if (page > 1) return MangasPage(emptyList(), false)
+        return MangasPage(api.homeSections().recent.map { it.toSManga() }, false)
+    }
 
     override suspend fun getSearchMangaList(page: Int, query: String, filters: FilterList): MangasPage {
         if (page > 1 || query.isBlank()) return MangasPage(emptyList(), false)
@@ -165,7 +174,7 @@ abstract class MangaYun : KeiSource() {
         } else {
             null
         }
-        val updatedManga = if (fetchDetails) details!!.toSManga(manga.url) else manga
+        val updatedManga = if (fetchDetails) details!!.toSManga(manga.url, key.siteId) else manga
         val updatedChapters = if (fetchChapters) {
             details!!.chapters
                 .sortedByDescending { it.order }
@@ -186,7 +195,11 @@ abstract class MangaYun : KeiSource() {
     override fun imageRequest(page: Page): Request {
         val referer = runCatching {
             val host = page.imageUrl?.let { it.toHttpUrlOrNull()?.host }
-            if (host != null) "https://$host/" else baseUrl + "/"
+            when {
+                host == null -> baseUrl + "/"
+                host == "cdndm5.com" || host.endsWith(".cdndm5.com") -> "https://www.dm5.com/"
+                else -> "https://$host/"
+            }
         }.getOrDefault(baseUrl + "/")
 
         return super.imageRequest(page).newBuilder()
@@ -197,7 +210,7 @@ abstract class MangaYun : KeiSource() {
     }
 
     override suspend fun getMangaByUrl(url: HttpUrl): SManga? {
-        if (url.host != baseUrl.toHttpUrl().host || url.pathSegments.firstOrNull() != "manga") return null
+        if (url.host != baseUrl.toHttpUrl().host || url.pathSegments.firstOrNull() !in setOf("m", "manga")) return null
         val key = url.pathSegments.getOrNull(1)?.let {
             try {
                 it.decodeMangaKey()
@@ -205,7 +218,7 @@ abstract class MangaYun : KeiSource() {
                 null
             }
         } ?: return null
-        return api.details(key.siteId, key.detailUrl).toSManga(url.encodedPath)
+        return api.details(key.siteId, key.detailUrl).toSManga(url.encodedPath, key.siteId)
     }
 
     private fun MangaYunSearch.toSManga() = SManga.create().apply {
@@ -215,19 +228,45 @@ abstract class MangaYun : KeiSource() {
             ?: this@toSManga.siteId.takeIf { it.isNotBlank() }
         title = sourceLabel?.let { "${this@toSManga.title} [$it]" } ?: this@toSManga.title
         description = this@toSManga.description
-        thumbnail_url = coverUrl
+        thumbnail_url = normalizeCoverUrl(coverUrl, siteId)
     }
 
-    private fun MangaYunDetails.toSManga(url: String) = SManga.create().apply {
+    private fun MangaYunHomeSection.toSManga() = SManga.create().apply {
+        url = mangaUrl(this@toSManga.siteId, this@toSManga.detailUrl)
+        val sourceLabel = this@toSManga.siteName?.takeIf { it.isNotBlank() }
+            ?: this@toSManga.siteId.takeIf { it.isNotBlank() }
+        title = sourceLabel?.let { "${this@toSManga.title} [$it]" } ?: this@toSManga.title
+        thumbnail_url = normalizeCoverUrl(this@toSManga.coverUrl, this@toSManga.siteId)
+    }
+
+    private fun normalizeCoverUrl(coverUrl: String?, siteId: String): String? {
+        if (coverUrl == null) return null
+        val url = coverUrl.toHttpUrlOrNull() ?: return coverUrl
+        if (url.encodedPath == "/api/image") return coverUrl
+
+        val whitelistedHosts = setOf("hamreus.com", "cdndm5.com", "ccavbox.com", "bgm.tv", "tuku.cc")
+        if (whitelistedHosts.any { url.host == it || url.host.endsWith(".$it") }) return coverUrl
+
+        return baseUrl.toHttpUrl().newBuilder()
+            .addPathSegment("api")
+            .addPathSegment("image")
+            .addQueryParameter("url", coverUrl)
+            .addQueryParameter("siteId", siteId)
+            .build()
+            .toString()
+    }
+
+    private fun MangaYunDetails.toSManga(url: String, siteId: String) = SManga.create().apply {
         this.url = url
         title = this@toSManga.title
         author = this@toSManga.author
         description = this@toSManga.description
         genre = this@toSManga.categories?.joinToString()
-        thumbnail_url = this@toSManga.coverUrl
+        thumbnail_url = normalizeCoverUrl(this@toSManga.coverUrl, siteId)
         status = when (this@toSManga.status?.trim()) {
             "完结", "已完结" -> SManga.COMPLETED
             "连载", "更新中" -> SManga.ONGOING
+            "未知" -> SManga.UNKNOWN
             else -> SManga.UNKNOWN
         }
         initialized = true
@@ -243,7 +282,15 @@ abstract class MangaYun : KeiSource() {
 
     private data class ChapterKey(val siteId: String, val chapterUrl: String)
 
-    private fun mangaUrl(siteId: String, detailUrl: String) = "/manga/${encodeKey(siteId, detailUrl)}"
+    private fun mangaUrl(siteId: String, detailUrl: String) = "/m/${encodeMangaKey(siteId, detailUrl)}"
+
+    private fun encodeMangaKey(siteId: String, url: String): String = Base64.encodeToString(
+        buildJsonArray {
+            add(siteId)
+            add(url)
+        }.toString().toByteArray(Charsets.UTF_8),
+        Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+    )
 
     private fun chapterUrl(siteId: String, chapterUrl: String) = "/chapter/${encodeKey(siteId, chapterUrl)}"
 
@@ -261,6 +308,11 @@ abstract class MangaYun : KeiSource() {
 
     private fun String.decodeKey(): Pair<String, String> {
         val decoded = Base64.decode(substringAfterLast('/'), Base64.URL_SAFE).toString(Charsets.UTF_8)
+        if (decoded.startsWith('[')) {
+            val values = decoded.parseAs<JsonArray>()
+            require(values.size == 2) { "Invalid MangaYun source URL" }
+            return values[0].jsonPrimitive.content to values[1].jsonPrimitive.content
+        }
         val separator = decoded.indexOf('\n')
         require(separator > 0) { "Invalid MangaYun source URL" }
         return decoded.substring(0, separator) to decoded.substring(separator + 1)
