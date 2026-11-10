@@ -8,7 +8,6 @@ import okhttp3.Headers
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.security.MessageDigest
-import java.util.UUID
 
 internal class MangaYunApi(private val source: MangaYun) {
 
@@ -96,24 +95,43 @@ internal class MangaYunApi(private val source: MangaYun) {
         ).execute()
         return response.parseAs()
     }
-
     private fun signedHeaders(path: String, body: String): Headers {
         val timestamp = System.currentTimeMillis().toString()
-        val nonce = UUID.randomUUID().toString().replace("-", "").take(16)
-        val raw = "$path|$body|$timestamp|$nonce|$SALT"
-        val signature = MessageDigest.getInstance("SHA-256")
-            .digest(raw.toByteArray(Charsets.UTF_8))
-            .joinToString("") { "%02x".format(it) }
+        val nonce = buildString(12) {
+            repeat(12) { append(POW_CHARS.random()) }
+        }
+        val challenge = sha256("$SALT|${timestamp.toLong() / POW_EPOCH_MS}|${path.take(12)}")
+        val proof = solveProof(challenge, timestamp, nonce)
+        val bodyHash = if (body.isEmpty()) "" else sha256(body)
+        val signature = sha256("$path|$bodyHash|$timestamp|$nonce|$FEAT|$proof|$challenge")
 
         return source.headers.newBuilder()
             .set("Content-Type", "application/json")
             .set("x-ym-ts", timestamp)
             .set("x-ym-nonce", nonce)
+            .set("x-ym-pow", proof.toString())
+            .set("x-ym-feat", FEAT)
             .set("x-ym-sign", signature)
             .build()
     }
 
+    private fun solveProof(challenge: String, timestamp: String, nonce: String): Int {
+        repeat(POW_MAX_ITERATIONS) { counter ->
+            val digest = sha256("$challenge:$timestamp:$nonce:$FEAT:$counter")
+            if (digest[0] == '0' && digest[1] == '0') return counter
+        }
+        return POW_MAX_ITERATIONS
+    }
+
+    private fun sha256(input: String): String = MessageDigest.getInstance("SHA-256")
+        .digest(input.toByteArray(Charsets.UTF_8))
+        .joinToString("") { "%02x".format(it) }
+
     private companion object {
-        const val SALT = "ym-salt-883a0f7e-29f1-4b72-9ad2"
+        const val SALT = "ym-cloud_ream-2026_v9-aegis_3c"
+        const val FEAT = "f"
+        const val POW_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
+        const val POW_EPOCH_MS = 300_000L
+        const val POW_MAX_ITERATIONS = 4096
     }
 }
