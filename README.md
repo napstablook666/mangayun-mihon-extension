@@ -55,7 +55,13 @@ Search once, browse results from a dozen Chinese manga sites without installing 
 Add the repository URL in Mihon → **Settings** → **Extensions** → **Add repository**:
 
 ```
-https://github.com/napstablook666/mangayun-mihon-extension/releases
+https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/repo.json
+```
+
+Mihon also accepts the Keiyoushi-style `index.min.json` entry point, which resolves to the same store:
+
+```
+https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/index.min.json
 ```
 
 Then find **MangaYun** in the extensions list and tap **Install**.

@@ -52,6 +52,25 @@ jobs:
           git archive --format=zip --output=source.zip HEAD
           test -s source.zip
 
+      - name: Generate extension repository metadata
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$(find src/zh/mangayun/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$apk"
+          apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -n1)"
+          test -n "$apksigner"
+          signing_key="$("$apksigner" verify --print-certs "$apk" 2>&1 | awk '/SHA-256 digest:/ {print tolower($NF); exit}')"
+          [[ "$signing_key" =~ ^[0-9a-f]{64}$ ]]
+          python .github/scripts/generate-repo.py \
+            --source-info src/zh/mangayun/build/keiyoushi-source-info.json \
+            --apk "$apk" \
+            --tag "$GITHUB_REF_NAME" \
+            --repository "$GITHUB_REPOSITORY" \
+            --signing-key "$signing_key" \
+            --output repo.json \
+            --legacy-index index.min.json
       - name: Publish release and retain latest three
         if: startsWith(github.ref, 'refs/tags/v')
         env:
@@ -86,10 +105,10 @@ jobs:
           if gh release view "$tag" >/dev/null 2>&1; then
             old_apk="$(gh release view "$tag" --json assets --jq '.assets[].name | select(endswith(".apk"))' | head -n1 || true)"
             [ -z "$old_apk" ] || gh release delete-asset "$tag" "$old_apk" --yes
-            gh release upload "$tag" "$apk" source.zip --clobber
+            gh release upload "$tag" "$apk" source.zip repo.json index.min.json --clobber
             gh release edit "$tag" --title "$tag" --notes "$(echo -e "$notes")"
           else
-            gh release create "$tag" "$apk" source.zip --title "$tag" --notes "$(echo -e "$notes")"
+            gh release create "$tag" "$apk" source.zip repo.json index.min.json --title "$tag" --notes "$(echo -e "$notes")"
           fi
           mapfile -t old_releases < <(gh release list --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[3:][] | .tagName')
           for old_tag in "${old_releases[@]}"; do

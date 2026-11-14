@@ -55,7 +55,13 @@
 在 Mihon → **设置** → **扩展** → **添加仓库** 中输入以下 URL：
 
 ```
-https://github.com/napstablook666/mangayun-mihon-extension/releases
+https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/repo.json
+```
+
+Mihon 也接受 Keiyoushi 风格的 `index.min.json` 入口，同目录会自动解析到同一个仓库：
+
+```
+https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/index.min.json
 ```
 
 然后在扩展列表中找到 **MangaYun** 并安装。
