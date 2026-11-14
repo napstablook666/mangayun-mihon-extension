@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="./src/zh/mangayun/res/mipmap-xxxhdpi/ic_launcher.png" alt="MangaYun icon" width="96">
+  <img src="./src/zh/mangayun/res/mipmap-xxxhdpi/ic_launcher.png" alt="云漫图标" width="96">
 </p>
 
 <h1 align="center">MangaYun</h1>
 
-<p align="center">A Mihon extension that aggregates Chinese manga from multiple sites through a signed cloud API.</p>
+<p align="center">通过签名云 API 聚合多个中文漫画站的 Mihon 扩展。</p>
 
 <p align="center">
-  <a href="./README.md">English</a> | <a href="./README.zh-CN.md">简体中文</a>
+  <a href="./README.en.md">English</a> | <a href="./README.md">简体中文</a>
 </p>
 
 <p align="center">
@@ -17,92 +17,92 @@
   <a href="https://linux.do/"><img src="https://img.shields.io/badge/LINUX.DO-社区-2EA44F?style=for-the-badge" alt="LINUX DO"></a>
 </p>
 
-Search once, browse results from a dozen Chinese manga sites without installing a separate source for each one. MangaYun wraps the YunMan cloud aggregation API into a standard Mihon extension — requests are HMAC-SHA256 signed, responses are JSON, and every manga and chapter gets a stable identifier that won't drift between refreshes.
+搜一次，翻十几个中文漫画站的结果，不用每个站单独装一个扩展。MangaYun 把云漫的聚合接口封装成标准 Mihon 扩展——请求走 HMAC-SHA256 签名，响应是 JSON，每本漫画和每个章节用源站 ID 加远端 URL 生成稳定标识，刷新不会漂移。
 
-## Highlights
+## 亮点
 
-| Highlight | Why it matters |
+| 亮点 | 说明 |
 |---|---|
-| Multi-site search | One query returns aggregated results from multiple Chinese manga sources |
-| Stable identifiers | Each manga and chapter uses the source site ID plus remote URL — keys stay consistent across refreshes |
-| Signed JSON API | HMAC-SHA256 signed requests, no scraping, no HTML parsing |
-| arm64-only build | Smaller APK, targets modern Android devices |
-| Keiyoushi-based | Built on the standard Mihon extension framework, compatible with any Mihon extension repo |
+| 多站聚合搜索 | 输入关键词一次，接口自动聚合多个中文漫画站的搜索结果 |
+| 稳定标识 | 用源站点 ID + 远端 URL 生成唯一标识，刷新不漂移 |
+| 签名 JSON API | 请求通过 HMAC-SHA256 签名，不依赖页面抓取或 HTML 解析 |
+| arm64 专用构建 | 仅编译 arm64-v8a，APK 体积更小 |
+| 基于 Keiyoushi 框架 | 兼容 Mihon 标准扩展仓库机制 |
 
-## Screenshots
+## 截图
 
 <p align="center">
-  <img src="./docs/screenshots/search-bar.jpg" alt="Search in MangaYun" width="720">
+  <img src="./docs/screenshots/search-bar.jpg" alt="MangaYun 搜索" width="720">
 </p>
 
 <p align="center">
-  <em>Search results aggregated from multiple Chinese manga sources.</em>
+  <em>搜索栏输入关键词，自动聚合多站结果。</em>
 </p>
 
 <p align="center">
-  <img src="./docs/screenshots/search-results.jpg" alt="Aggregated search results" width="360">
-  <img src="./docs/screenshots/manga-detail.jpg" alt="Manga detail and chapter list" width="360">
+  <img src="./docs/screenshots/search-results.jpg" alt="聚合搜索结果" width="360">
+  <img src="./docs/screenshots/manga-detail.jpg" alt="漫画详情与章节列表" width="360">
 </p>
 
 <p align="center">
-  <em>Left: aggregated results from multiple sites. Right: manga details with chapter list.</em>
+  <em>左：多站聚合结果。右：漫画详情与章节列表。</em>
 </p>
 
-## Quick Install
+## 快速安装
 
-### Via extension repository
+### 通过扩展仓库
 
-Add the repository URL in Mihon → **Settings** → **Extensions** → **Add repository**:
+在 Mihon → **设置** → **扩展** → **添加仓库** 中输入以下 URL：
 
 ```
 https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/repo.json
 ```
 
-Mihon also accepts the Keiyoushi-style `index.min.json` entry point, which resolves to the same store:
+Mihon 也接受 Keiyoushi 风格的 `index.min.json` 入口，同目录会自动解析到同一个仓库：
 
 ```
 https://github.com/napstablook666/mangayun-mihon-extension/releases/latest/download/index.min.json
 ```
 
-Then find **MangaYun** in the extensions list and tap **Install**.
+然后在扩展列表中找到 **MangaYun** 并安装。
 
-### Build from source
+### 从源码构建
 
-**Requirements:** JDK 21, Android SDK.
+**环境要求：** JDK 21、Android SDK。
 
 ```bash
 ./gradlew :src:zh:mangayun:lintRelease :src:zh:mangayun:assembleRelease --no-daemon
 ```
 
-APK output: `src/zh/mangayun/build/outputs/apk/release/`
+APK 输出路径：`src/zh/mangayun/build/outputs/apk/release/`
 
-Current version: `1.6.7` (see `src/zh/mangayun/build.gradle.kts`).
+当前版本：`1.6.7`（见 `src/zh/mangayun/build.gradle.kts`）。
 
-## Usage
+## 使用
 
-1. Open **Extensions** in Mihon
-2. Tap **MangaYun**
-3. Enter a manga title in the search bar
-4. Browse the aggregated results — each entry shows which source site it comes from
-5. Tap a result to view details and chapters
+1. 在 Mihon 中打开 **扩展**
+2. 点击 **MangaYun**
+3. 在搜索栏输入漫画名称
+4. 浏览聚合结果——每条会标注来源站点
+5. 点击结果查看详情和章节
 
-Reading progress is saved locally by Mihon.
+阅读进度由 Mihon 本地保存。
 
-## Automatic releases
+## 自动发布
 
-Pushing a `v*` tag triggers a GitHub Actions workflow that builds the arm64 APK with JDK 21, creates a release with the APK and source archive, and keeps only the latest 3 releases.
+推送 `v*` 标签会触发 GitHub Actions 工作流，使用 JDK 21 构建 arm64 APK，同时打包源码归档，创建 Release，并自动清理仅保留最近 3 个 Release。
 
-## Contributing
+## 参与贡献
 
-PRs are welcome. Open an issue or submit a pull request for improvements.
+欢迎提交 PR。如有问题或建议，请提交 Issue 或直接发起 Pull Request。
 
-> This project was largely generated with the assistance of AI (DeepSeek, GPT) and manually refined.
+> 本项目大部分内容由 AI（DeepSeek、GPT）辅助生成，并经过人工校调。
 
-## Source code
+## 源码
 
-The extension source lives in `src/zh/mangayun/`. This project builds on the [Keiyoushi extensions-source](https://github.com/keiyoushi/extensions-source) framework.
+扩展源码位于 `src/zh/mangayun/`。本项目基于 [Keiyoushi extensions-source](https://github.com/keiyoushi/extensions-source) 框架开发。
 
-## License
+## 许可
 
 [MIT](LICENSE) © 2026 napstablook666
 
