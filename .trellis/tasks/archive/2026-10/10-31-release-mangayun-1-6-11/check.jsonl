@@ -1,3 +1,0 @@
-{"file":".github/workflows/release-mangayun.yml","reason":"检查 v1.6.11 标签工作流、构建、Release asset 和保留策略"}
-{"file":"src/zh/mangayun/build.gradle.kts","reason":"检查版本代码与生成的扩展版本名"}
-{"file":".trellis/tasks/10-31-release-mangayun-1-6-11/prd.md","reason":"核对发布任务验收条件和范围约束"}

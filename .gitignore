@@ -4,3 +4,13 @@ build/
 local.properties
 signingkey.jks
 .kotlin/
+
+# AI 工具与本地工作区，不入库
+.agents/
+.codestable/
+.codegraph/
+.pi/
+.trellis/
+AGENTS.md
+.gitattributes
+derived/

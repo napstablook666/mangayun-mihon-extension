@@ -1,4 +1,0 @@
-{"file": "src/zh/mangayun/src/eu/kanade/tachiyomi/extension/zh/mangayun/MangaYun.kt", "reason": "Change the chapter image Referer mapping here; preserve existing image flow."}
-{"file": "src/zh/mangayun/src/eu/kanade/tachiyomi/extension/zh/mangayun/MangaYunApi.kt", "reason": "Confirm details and chapter-images request/signature contracts stay unchanged."}
-{"file": ".trellis/spec/backend/mangayun-source-contracts.md", "reason": "Update the maintained host Referer contract after the verified fix."}
-{"file": ".trellis/tasks/10-31-fix-mangayun-detail-403/design.md", "reason": "Approved technical design and verified root cause."}

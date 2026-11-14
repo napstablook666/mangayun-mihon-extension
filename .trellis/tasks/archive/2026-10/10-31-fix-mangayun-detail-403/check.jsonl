@@ -1,3 +1,0 @@
-{"file": "src/zh/mangayun/src/eu/kanade/tachiyomi/extension/zh/mangayun/MangaYun.kt", "reason": "Review host matching and ensure unrelated image Referer behavior is unchanged."}
-{"file": ".trellis/spec/backend/mangayun-source-contracts.md", "reason": "Check source contract and validation requirements."}
-{"file": ".trellis/tasks/10-31-fix-mangayun-detail-403/implement.md", "reason": "Run the planned build and scope review."}

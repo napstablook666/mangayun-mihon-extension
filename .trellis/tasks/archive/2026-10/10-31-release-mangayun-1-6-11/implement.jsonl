@@ -1,3 +1,0 @@
-{"file":"src/zh/mangayun/build.gradle.kts","reason":"当前版本代码，发布 1.6.11 需要递增到 11"}
-{"file":".github/workflows/release-mangayun.yml","reason":"标签触发 Release、更新说明和 APK asset 发布逻辑"}
-{"file":".trellis/tasks/archive/2026-10/10-31-release-mangayun-1-6-10/prd.md","reason":"上一版发布任务的验收和发布约束参考"}
